@@ -7,7 +7,9 @@ export async function POST(req: NextRequest) {
   try {
     await sendPasswordResetEmail(auth, email);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error: unknown) {
+    let message = "Unknown error";
+    if (error instanceof Error) message = error.message;
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 } 

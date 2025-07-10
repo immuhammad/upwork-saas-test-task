@@ -23,8 +23,10 @@ export default function SignupPage() {
       if (!res.ok) throw new Error(data.error || "Signup failed");
       // Redirect to Stripe Checkout
       router.push(data.checkoutUrl);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      let msg = "Unknown error";
+      if (err instanceof Error) msg = err.message;
+      setError(msg);
     } finally {
       setLoading(false);
     }

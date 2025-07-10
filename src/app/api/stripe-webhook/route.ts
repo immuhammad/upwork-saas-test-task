@@ -13,22 +13,24 @@ export async function POST(req: NextRequest) {
       sig!,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (err: any) {
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+  } catch (error: unknown) {
+    let message = "Unknown error";
+    if (error instanceof Error) message = error.message;
+    return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 });
   }
 
   let notify = false;
-  let payload: any = {};
+  let payload: Record<string, unknown> = {};
   if (
     event.type === "checkout.session.completed" ||
     event.type === "invoice.paid" ||
     event.type === "customer.subscription.created"
   ) {
     notify = true;
-    const obj = event.data.object as any;
+    const obj = event.data.object as unknown as Record<string, unknown>;
     payload = {
-      email: obj.customer_email || obj.customer?.email,
-      subscriptionId: obj.subscription || obj.id,
+      email: (obj["customer_email"] as string) || (obj["customer"] as { email?: string })?.email,
+      subscriptionId: (obj["subscription"] as string) || (obj["id"] as string),
       timestamp: Date.now(),
     };
   }

@@ -21,8 +21,10 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Reset failed");
       setMessage("Password reset email sent!");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      let msg = "Unknown error";
+      if (err instanceof Error) msg = err.message;
+      setError(msg);
     } finally {
       setLoading(false);
     }

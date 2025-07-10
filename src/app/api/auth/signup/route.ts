@@ -6,6 +6,7 @@ import { stripe } from "@/lib/stripe";
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
   try {
+    // Create user in Firebase
     await createUserWithEmailAndPassword(auth, email, password);
     // Create Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
@@ -25,7 +26,9 @@ export async function POST(req: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/signup?canceled=1`,
     });
     return NextResponse.json({ checkoutUrl: session.url });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error: unknown) {
+    let message = "Unknown error";
+    if (error instanceof Error) message = error.message;
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 } 
